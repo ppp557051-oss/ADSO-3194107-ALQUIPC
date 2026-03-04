@@ -97,6 +97,10 @@ input, select{
     width: 100%;
     padding: 10px;
 }
+
+#resultado {
+    transition: all 0.5s ease;
+}
 </style>
 </head>
 
@@ -120,7 +124,7 @@ input, select{
         <input type="number" min="1" placeholder="Ej: 5">
 
         <label>Días adicionales</label>
-        <input type="number" min="0" placeholder="Ej: 2">
+        <input type="number" min="0" max="15" placeholder="Ej: 2">
 
         <label for="tipo">Tipo de alquiler</label>
 <select name="tipo" id="tipo">

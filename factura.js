@@ -1,31 +1,35 @@
 function calcular() {
     const nombre = document.getElementById('nombre').value;
     const email = document.getElementById('email').value;
-    const numEquipos = parseInt(document.querySelector('input[placeholder="Ej: 3"]').value);
-    const diasIniciales = parseInt(document.querySelector('input[placeholder="Ej: 5"]').value);
-    const diasAdicionales = parseInt(document.querySelector('input[placeholder="Ej: 2"]').value) || 0;
-    const tipoAlquiler = document.getElementById('tipo').value;
+    const numEquipos = parseInt(document.querySelector('input[placeholder="Ej: 3"]').value) || 0;
+    const diasInic = parseInt(document.querySelector('input[placeholder="Ej: 5"]').value) || 0;
+    const diasAdd = parseInt(document.querySelector('input[placeholder="Ej: 2"]').value) || 0;
+    const tipo = document.getElementById('tipo').value;
 
-    if (!nombre || !email || isNaN(numEquipos) || isNaN(diasIniciales)) {
-        alert("Por favor, completa todos los campos obligatorios.");
+    if (!nombre || !email || numEquipos < 2 || diasInic < 1) {
+        alert("Por favor, completa los campos correctamente (mínimo 2 equipos).");
         return;
     }
 
-    const precioPorDia = 50000; // Precio por equipo al día
-    const totalDias = diasIniciales + diasAdicionales;
+    const PRECIO_DIA = 50000;
+    const costoBaseInic = (numEquipos * diasInic) * PRECIO_DIA;
+    let costoBaseAdd = (numEquipos * diasAdd) * PRECIO_DIA;
     
-    let subtotal = (numEquipos * totalDias) * precioPorDia;
-    let ajuste = 0;
-    let mensajeAjuste = "Ninguno";
+    let detalleDescuento = "No aplica";
+    let detalleRecargo = "No aplica";
 
-    if (tipoAlquiler === "fuera") {
-        ajuste = subtotal * 0.05; // +5%
-        subtotal += ajuste;
-        mensajeAjuste = "Recargo fuera de ciudad (+5%)";
-    } else if (tipoAlquiler === "establecimiento") {
-        ajuste = subtotal * 0.05; // -5%
-        subtotal -= ajuste;
-        mensajeAjuste = "Descuento en establecimiento (-5%)";
+    if (tipo === "establecimiento" && diasAdd > 0) {
+        const descuento = costoBaseAdd * 0.05;
+        costoBaseAdd -= descuento;
+        detalleDescuento = "-$ " + descuento.toLocaleString();
+    }
+
+    let subtotal = costoBaseInic + costoBaseAdd;
+
+    if (tipo === "fuera") {
+        const recargo = subtotal * 0.05;
+        subtotal += recargo;
+        detalleRecargo = "+$ " + recargo.toLocaleString();
     }
 
     const formatoMoneda = new Intl.NumberFormat('es-CO', {
@@ -34,19 +38,23 @@ function calcular() {
         minimumFractionDigits: 0
     });
 
-    const factura = `
-        --- FACTURA ALQUIPC ---
-        Cliente: ${nombre}
-        Correo: ${email}
-        -----------------------
-        Cant. Equipos: ${numEquipos}
-        Días Totales: ${totalDias} (${diasIniciales} iniciales + ${diasAdicionales} extra)
-        
-        Ajuste: ${mensajeAjuste}
-        TOTAL A PAGAR: ${formatoMoneda.format(subtotal)}
-        -----------------------
-        ¡Gracias por su confianza!
-    `;
+    const divResultado = document.getElementById('resultado');
+    
+    divResultado.style.marginTop = "20px";
+    divResultado.style.padding = "15px";
+    divResultado.style.border = "2px dashed #4ca1af";
+    divResultado.style.backgroundColor = "#fff";
 
-    alert(factura);
+    divResultado.innerHTML = `
+        <h3 style="text-align: center; color: #2c3e50;">RESUMEN DE FACTURA</h3>
+        <hr>
+        <p><strong>Cliente:</strong> ${nombre}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Equipos:</strong> ${numEquipos}</p>
+        <p><strong>Días totales:</strong> ${diasInic + diasAdd}</p>
+        <hr>
+        <p>Desc. Días Add (5%): <span style="color: green;">${detalleDescuento}</span></p>
+        <p>Recargo Ciudad (5%): <span style="color: red;">${detalleRecargo}</span></p>
+        <h2 style="text-align: center; color: #2c3e50;">TOTAL: ${formatoMoneda.format(subtotal)}</h2>
+    `;
 }
